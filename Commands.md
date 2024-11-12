@@ -1,4 +1,4 @@
-```console
+```
 CREATE TABLE Pazienti (
     ID SERIAL PRIMARY KEY,
     nome VARCHAR(50) NOT NULL,

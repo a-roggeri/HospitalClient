@@ -8,4 +8,5 @@ Il progetto riguarda un sistema di gestione ospedaliero. Viene utilizzato un dat
 Psycopg2 Installato(comando da Terminale per l'installazione: ```pip install Flask psycopg2```). <br />
 ## Configurazione database
 Innanzitutto è necessario creare un database in postgreSQL(assicurarsi di utilizzare l'username predefinito ```postgres``` e la password ```admin```). Utilizzare il comando ```CREATE DATABASE hospital_management;``` nel Terminale psql per creare il database, quindi connettersi ad esso tramite il comando ```\c hospital_management;```.
-Ora che il database è stato creato, aggiungere le tabelle, trigger e viste materializzate necessarie tramite i comandi contenuti nel file [Commands.me]().
+Ora che il database è stato creato, aggiungere le tabelle, trigger e viste materializzate necessarie tramite i comandi contenuti nel file [Commands.md](https://github.com/a-roggeri/HospitalClient/blob/master/Commands.md).
+Infine popolare il database tramite gli insert contenuti nel file [Populate.md](https://github.com/a-roggeri/HospitalClient/blob/master/Populate.md).

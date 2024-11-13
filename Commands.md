@@ -153,5 +153,5 @@ GROUP BY mese
 ORDER BY mese DESC;
 
 CREATE INDEX idx_fts_note_mediche ON Cartelle_Cliniche
-```
 USING gin(to_tsvector('italian', note_mediche));
+```

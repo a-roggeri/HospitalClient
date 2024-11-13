@@ -50,7 +50,7 @@ CREATE TABLE Prescrizioni (
     note TEXT
 );
 
-CREATE OR REPLACE FUNCTION report_settimanale_appuntamenti()
+CREATE FUNCTION report_settimanale_appuntamenti()
 RETURNS TABLE(personale_nome VARCHAR, personale_cognome VARCHAR, conteggio_appuntamenti INTEGER) AS $$
 BEGIN
     RETURN QUERY
@@ -62,7 +62,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION log_nuovo_appuntamento()
+CREATE FUNCTION log_nuovo_appuntamento()
 RETURNS TRIGGER AS $$
 BEGIN
     INSERT INTO log_eventi (evento, descrizione, data_evento)
@@ -88,19 +88,9 @@ EXECUTE FUNCTION log_nuovo_appuntamento();
 CREATE MATERIALIZED VIEW vista_ricoveri_settimanali AS
 SELECT paziente_id, COUNT(*) AS numero_ricoveri
 FROM Cartelle_Cliniche
-WHERE stato_attuale = 'ricoverato'
+WHERE stato_attuale = 'RICOVERATO'
 AND data_creazione >= NOW() - INTERVAL '7 days'
 GROUP BY paziente_id;
-
-CREATE ROLE admin;
-CREATE ROLE medico;
-CREATE ROLE infermiere;
-CREATE ROLE receptionist;
-
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO admin;
-GRANT SELECT, INSERT, UPDATE ON Pazienti, Appuntamenti, Cartelle_Cliniche, Prescrizioni TO medico;
-GRANT SELECT, UPDATE ON Pazienti, Appuntamenti TO infermiere;
-GRANT SELECT, INSERT ON Pazienti, Appuntamenti TO receptionist;
 
 CREATE TABLE log_modifiche (
     ID SERIAL PRIMARY KEY,
@@ -130,7 +120,7 @@ CREATE TABLE storico_appuntamenti (
 CREATE OR REPLACE FUNCTION sposta_appuntamento_storico()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.stato = 'completato' THEN
+    IF NEW.stato = 'COMPLETATO' THEN
         INSERT INTO storico_appuntamenti SELECT * FROM Appuntamenti WHERE ID = NEW.ID;
         DELETE FROM Appuntamenti WHERE ID = NEW.ID;
     END IF;
@@ -141,7 +131,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_sposta_appuntamento_storico
 AFTER UPDATE OF stato ON Appuntamenti
 FOR EACH ROW
-WHEN (NEW.stato = 'completato')
+WHEN (NEW.stato = 'COMPLETATO')
 EXECUTE FUNCTION sposta_appuntamento_storico();
 
 CREATE MATERIALIZED VIEW analisi_mensile_pazienti AS

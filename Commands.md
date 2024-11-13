@@ -15,7 +15,7 @@ CREATE TABLE Personale (
     ID SERIAL PRIMARY KEY,
     nome VARCHAR(50) NOT NULL,
     cognome VARCHAR(50) NOT NULL,
-    ruolo VARCHAR(50) NOT NULL,
+    ruolo VARCHAR(50) CHECK (ruolo IN ('ADMIN', 'MEDICO', 'INFERMIERE', 'RECEPTIONIST')) NOT NULL,
     reparto VARCHAR(50) NOT NULL,
     telefono VARCHAR(15) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE Cartelle_Cliniche (
     paziente_id INT NOT NULL REFERENCES Pazienti(ID) ON DELETE CASCADE,
     data_creazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     note_mediche TEXT,
-    stato_attuale VARCHAR(100) NOT NULL
+    stato_attuale VARCHAR(100) CHECK (stato_attuale IN ('RICOVERATO', 'AMBULATORIALE', 'OSSERVAZIONE', 'DIMESSO')) NOT NULL
 );
 
 CREATE TABLE Appuntamenti (
@@ -37,7 +37,7 @@ CREATE TABLE Appuntamenti (
     data DATE NOT NULL,
     ora TIME NOT NULL,
     motivo TEXT NOT NULL,
-    stato VARCHAR(20) DEFAULT 'programmato' NOT NULL
+    stato VARCHAR(20) CHECK (stato IN ('PROGRAMMATO', 'COMPLETATO', 'ANNULLATO')) DEFAULT 'PROGRAMMATO' NOT NULL
 );
 
 CREATE TABLE Prescrizioni (

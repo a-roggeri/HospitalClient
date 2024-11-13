@@ -58,10 +58,11 @@ namespace HospitalClient
 			string? ruolo = null;
 			while (string.IsNullOrEmpty(ruolo))
 			{
-				Console.Write("Inserisci il tuo nome e cognome (lascia vuoto per uscire): ");
+				Console.Clear();
+				Console.Write("Inserisci il tuo nome e cognome (inserire 0 per uscire): ");
 				var input = Console.ReadLine();
-				if (string.IsNullOrEmpty(input) || !input.Contains(" ")) return null;
-
+				if (input == "0") return null;
+				if (string.IsNullOrEmpty(input) || !input.Contains(" ")) continue;
 				string[] parts = input.Split(" ");
 				string nome = parts[0];
 				string cognome = parts[1];
@@ -335,359 +336,837 @@ namespace HospitalClient
 				}
 			}
 		}
-		static void FetchPrescrizioni()
+
+		static void CreaPaziente()
 		{
-			using var connection = new NpgsqlConnection(connectionString);
-			connection.Open();
-
-			string query = @"SELECT p.nome AS paziente_nome, p.cognome AS paziente_cognome, pr.farmaco, pr.dosaggio, pr.frequenza, pr.durata, pr.note
-                             FROM Prescrizioni pr
-                             JOIN Cartelle_Cliniche cc ON pr.cartella_clinica_id = cc.ID
-                             JOIN Pazienti p ON cc.paziente_id = p.ID";
-			using var cmd = new NpgsqlCommand(query, connection);
-			using var reader = cmd.ExecuteReader();
-
-			Console.WriteLine("\nElenco Prescrizioni:");
-			while (reader.Read())
-			{
-				Console.WriteLine($"{reader["paziente_nome"]} {reader["paziente_cognome"]}, Farmaco: {reader["farmaco"]}, Dosaggio: {reader["dosaggio"]}, Frequenza: {reader["frequenza"]}, Durata: {reader["durata"]}, Note: {reader["note"]}");
-			}
-			Console.WriteLine("Premere Invio per continuare.");
-			Console.ReadLine();
-		}
-
-		static void FetchAppuntamenti()
-		{
-			using var connection = new NpgsqlConnection(connectionString);
-			connection.Open();
-
-			string query = @"SELECT p.nome AS paziente_nome, p.cognome AS paziente_cognome, per.nome AS personale_nome, per.cognome AS personale_cognome, a.data, a.ora, a.motivo, a.stato
-                             FROM Appuntamenti a
-                             JOIN Pazienti p ON a.paziente_id = p.ID
-                             LEFT JOIN Personale per ON a.personale_id = per.ID";
-			using var cmd = new NpgsqlCommand(query, connection);
-			using var reader = cmd.ExecuteReader();
-
-			Console.WriteLine("\nElenco Appuntamenti:");
-			while (reader.Read())
-			{
-				Console.WriteLine($"{reader["paziente_nome"]} {reader["paziente_cognome"]} con {reader["personale_nome"]} {reader["personale_cognome"]}, Data: {reader["data"]}, Ora: {reader["ora"]}, Motivo: {reader["motivo"]}, Stato: {reader["stato"]}");
-			}
-			Console.WriteLine("Premere Invio per continuare.");
-			Console.ReadLine();
-		}
-
-		static void FetchCartelleCliniche()
-		{
-			using var connection = new NpgsqlConnection(connectionString);
-			connection.Open();
-
-			string query = @"SELECT p.nome AS paziente_nome, p.cognome AS paziente_cognome, cc.data_creazione, cc.note_mediche, cc.stato_attuale
-                             FROM Cartelle_Cliniche cc
-                             JOIN Pazienti p ON cc.paziente_id = p.ID";
-			using var cmd = new NpgsqlCommand(query, connection);
-			using var reader = cmd.ExecuteReader();
-
-			Console.WriteLine("\nElenco Cartelle Cliniche:");
-			while (reader.Read())
-			{
-				Console.WriteLine($"{reader["paziente_nome"]} {reader["paziente_cognome"]}, Data Creazione: {reader["data_creazione"]}, Note: {reader["note_mediche"]}, Stato Attuale: {reader["stato_attuale"]}");
-			}
-			Console.WriteLine("Premere Invio per continuare.");
-			Console.ReadLine();
-		}
-
-
-		static void FetchPazienti()
-		{
-			using var connection = new NpgsqlConnection(connectionString);
-			connection.Open();
-
-			string query = "SELECT * FROM Pazienti";
-			using var cmd = new NpgsqlCommand(query, connection);
-			using var reader = cmd.ExecuteReader();
-
-			Console.WriteLine("\nElenco Pazienti:");
-			while (reader.Read())
-			{
-				Console.WriteLine($"{reader["nome"]} {reader["cognome"]}, Email: {reader["email"]}");
-			}
-			Console.WriteLine("Premere Invio per continuare.");
-			Console.ReadLine();
-		}
-
-		static void FetchPersonale()
-		{
-			using var connection = new NpgsqlConnection(connectionString);
-			connection.Open();
-
-			string query = "SELECT * FROM Personale";
-			using var cmd = new NpgsqlCommand(query, connection);
-			using var reader = cmd.ExecuteReader();
-
-			Console.WriteLine("\nElenco Personale:");
-			while (reader.Read())
-			{
-				Console.WriteLine($"{reader["nome"]} {reader["cognome"]}, Email: {reader["email"]}, Ruolo: {reader["ruolo"]}, Reparto: {reader["reparto"]}");
-			}
-			Console.WriteLine("Premere Invio per continuare.");
-			Console.ReadLine();
-		}
-
-		static void FetchReportSettimanale()
-		{
-			using var connection = new NpgsqlConnection(connectionString);
-			connection.Open();
-
-			string query = "SELECT * FROM report_settimanale_appuntamenti()";
-			using var cmd = new NpgsqlCommand(query, connection);
-			using var reader = cmd.ExecuteReader();
-
-			Console.WriteLine("\nReport Settimanale degli Appuntamenti:");
-			while (reader.Read())
-			{
-				string personaleNome = reader.GetString(reader.GetOrdinal("personale_nome"));
-				string personaleCognome = reader.GetString(reader.GetOrdinal("personale_cognome"));
-				long conteggioAppuntamenti = reader.GetInt64(reader.GetOrdinal("conteggio_appuntamenti"));
-				Console.WriteLine($"{personaleNome} {personaleCognome} - Appuntamenti: {conteggioAppuntamenti}");
-			}
-			Console.WriteLine("Premere Invio per continuare.");
-			Console.ReadLine();
-		}
-
-		static string FetchInput(string prompt)
-		{
-			string? input = string.Empty;
-			Console.Write(prompt);
-			input = Console.ReadLine();
-			while (string.IsNullOrEmpty(input))
-			{
-				Console.Write("Dato mancante. Riprova:");
-				input = Console.ReadLine();
-			}
-			return input;
-		}
-
-		static void PromptAddPaziente()
-		{
-			string nome = FetchInput("Nome: ");
+			Console.Write("Nome: ");
+			string nome = Console.ReadLine();
 			Console.Write("Cognome: ");
-			string cognome = FetchInput("Cognome: ");
-
-			Console.Write("Data di Nascita (YYYY-MM-DD): ");
-			DateTime dataDiNascita;
-			while (!IsValidDate(Console.ReadLine(), out dataDiNascita))
-			{
-				Console.Write("Data non valida. Inserisci una data valida (YYYY-MM-DD): ");
-			}
-
+			string cognome = Console.ReadLine();
+			Console.Write("Data di nascita (YYYY-MM-DD): ");
+			string dataDiNascita = Console.ReadLine();
 			Console.Write("Sesso (M/F/O): ");
-			string sesso;
-			while (!IsValidSesso(sesso = Console.ReadLine()?.ToUpper()))
-			{
-				Console.Write("Sesso non valido. Inserisci M, F o O: ");
-			}
-
-			Console.Write("Indirizzo (lascia vuoto se non specificato): ");
-			string? indirizzo = Console.ReadLine();
-			indirizzo = string.IsNullOrEmpty(indirizzo) ? null : indirizzo;
-
-			Console.Write("Telefono (solo numeri, da 10 a 15 cifre): ");
-			string telefono;
-			while (!IsValidPhone(telefono = Console.ReadLine()))
-			{
-				Console.Write("Numero di telefono non valido. Riprova: ");
-			}
-
+			string sesso = Console.ReadLine();
+			Console.Write("Indirizzo: ");
+			string indirizzo = Console.ReadLine();
+			Console.Write("Telefono: ");
+			string telefono = Console.ReadLine();
 			Console.Write("Email: ");
-			string email;
-			while (!IsValidEmail(email = Console.ReadLine()))
-			{
-				Console.Write("Email non valida. Riprova: ");
-			}
+			string email = Console.ReadLine();
 
-			AddPaziente(nome, cognome, dataDiNascita, sesso, indirizzo, telefono, email);
-		}
-
-		static void AddPaziente(string nome, string cognome, DateTime dataDiNascita, string sesso, string? indirizzo, string telefono, string email)
-		{
 			using var connection = new NpgsqlConnection(connectionString);
 			connection.Open();
-
-			string query = @"INSERT INTO Pazienti (nome, cognome, data_di_nascita, sesso, indirizzo, telefono, email) 
-                             VALUES (@nome, @cognome, @dataDiNascita, @sesso, @indirizzo, @telefono, @email)";
+			string query = "INSERT INTO Pazienti (nome, cognome, data_di_nascita, sesso, indirizzo, telefono, email) VALUES (@nome, @cognome, @dataDiNascita, @sesso, @indirizzo, @telefono, @email)";
 			using var cmd = new NpgsqlCommand(query, connection);
-
 			cmd.Parameters.AddWithValue("nome", nome);
 			cmd.Parameters.AddWithValue("cognome", cognome);
-			cmd.Parameters.AddWithValue("dataDiNascita", dataDiNascita);
+			cmd.Parameters.AddWithValue("dataDiNascita", DateTime.Parse(dataDiNascita));
 			cmd.Parameters.AddWithValue("sesso", sesso);
-			cmd.Parameters.AddWithValue("indirizzo", indirizzo ?? (object)DBNull.Value);
+			cmd.Parameters.AddWithValue("indirizzo", indirizzo);
 			cmd.Parameters.AddWithValue("telefono", telefono);
 			cmd.Parameters.AddWithValue("email", email);
 
-			cmd.ExecuteNonQuery();
-			Console.WriteLine($"Paziente {nome} {cognome} aggiunto con successo.");
-			Console.WriteLine("Premere Invio per continuare.");
-			Console.ReadLine();
-		}
-
-		
-
-		static void PromptUpdateAppuntamentoStatus()
-		{
-			Console.Write("ID Appuntamento: ");
-			int appuntamentoId = int.Parse(FetchInput("ID Appuntamento: "));
-
-			Console.Write("Nuovo Stato (programmato/completato/annullato): ");
-			string nuovoStato;
-			while (!IsValidStatoAppuntamento(nuovoStato = Console.ReadLine().ToLower()))
+			try
 			{
-				Console.Write("Stato non valido. Inserisci uno stato valido (programmato/completato/annullato): ");
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Paziente creato con successo.");
 			}
-
-			UpdateAppuntamentoStatus(appuntamentoId, nuovoStato);
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
 		}
 
-		static void UpdateAppuntamentoStatus(int appuntamentoId, string nuovoStato)
+		static void VisualizzaPazienti()
 		{
 			using var connection = new NpgsqlConnection(connectionString);
 			connection.Open();
-
-			string query = "UPDATE Appuntamenti SET stato = @stato WHERE ID = @id";
+			string query = "SELECT * FROM Pazienti";
 			using var cmd = new NpgsqlCommand(query, connection);
-
-			cmd.Parameters.AddWithValue("stato", nuovoStato);
-			cmd.Parameters.AddWithValue("id", appuntamentoId);
-
-			cmd.ExecuteNonQuery();
-			Console.WriteLine($"Stato dell'appuntamento ID {appuntamentoId} aggiornato a '{nuovoStato}'.");
-			Console.WriteLine("Premere Invio per continuare.");
-			Console.ReadLine();
+			using var reader = cmd.ExecuteReader();
+			while (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Nome: {reader["nome"]}, Cognome: {reader["cognome"]}, Data di nascita: {reader["data_di_nascita"]}, Sesso: {reader["sesso"]}, Indirizzo: {reader["indirizzo"]}, Telefono: {reader["telefono"]}, Email: {reader["email"]}, Data registrazione: {reader["data_registrazione"]}");
+			}
+			Console.WriteLine("Premere un tasto per continuare..."); 
+			Console.ReadKey();
 		}
 
-		static void PromptAddAppuntamento()
+		static void VisualizzaDettagliPaziente()
+		{
+			Console.Write("Inserisci l'ID del paziente: ");
+			int id = int.Parse(Console.ReadLine());
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM Pazienti WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("id", id);
+			using var reader = cmd.ExecuteReader();
+			if (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Nome: {reader["nome"]}, Cognome: {reader["cognome"]}, Data di nascita: {reader["data_di_nascita"]}, Sesso: {reader["sesso"]}, Indirizzo: {reader["indirizzo"]}, Telefono: {reader["telefono"]}, Email: {reader["email"]}, Data registrazione: {reader["data_registrazione"]}");
+			}
+			else
+			{
+				Console.WriteLine("Paziente non trovato.");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void AggiornaPaziente()
+		{
+			Console.Write("Inserisci l'ID del paziente da aggiornare: ");
+			int id = int.Parse(Console.ReadLine());
+
+			Console.Write("Nome: ");
+			string nome = Console.ReadLine();
+			Console.Write("Cognome: ");
+			string cognome = Console.ReadLine();
+			Console.Write("Data di nascita (YYYY-MM-DD): ");
+			string dataDiNascita = Console.ReadLine();
+			Console.Write("Sesso (M/F/O): ");
+			string sesso = Console.ReadLine();
+			Console.Write("Indirizzo: ");
+			string indirizzo = Console.ReadLine();
+			Console.Write("Telefono: ");
+			string telefono = Console.ReadLine();
+			Console.Write("Email: ");
+			string email = Console.ReadLine();
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "UPDATE Pazienti SET nome = @nome, cognome = @cognome, data_di_nascita = @dataDiNascita, sesso = @sesso, indirizzo = @indirizzo, telefono = @telefono, email = @email WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("nome", nome);
+			cmd.Parameters.AddWithValue("cognome", cognome);
+			cmd.Parameters.AddWithValue("dataDiNascita", DateTime.Parse(dataDiNascita));
+			cmd.Parameters.AddWithValue("sesso", sesso);
+			cmd.Parameters.AddWithValue("indirizzo", indirizzo);
+			cmd.Parameters.AddWithValue("telefono", telefono);
+			cmd.Parameters.AddWithValue("email", email);
+			cmd.Parameters.AddWithValue("id", id);
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Paziente aggiornato con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void EliminaPaziente()
+		{
+			Console.Write("Inserisci l'ID del paziente da eliminare: ");
+			int id = int.Parse(Console.ReadLine());
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "DELETE FROM Pazienti WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("id", id);
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Paziente eliminato con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void VisualizzaAnalisiMensilePazienti()
+		{
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM analisi_mensile_pazienti";
+			using var cmd = new NpgsqlCommand(query, connection);
+			using var reader = cmd.ExecuteReader();
+			while (reader.Read())
+			{
+				Console.WriteLine($"Mese: {reader["mese"]}, Numero pazienti: {reader["numero_pazienti"]}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void CreaPersonale()
+		{
+			Console.Write("Nome: ");
+			string nome = Console.ReadLine();
+			Console.Write("Cognome: ");
+			string cognome = Console.ReadLine();
+			Console.Write("Ruolo (ADMIN/MEDICO/INFERMIERE/RECEPTIONIST): ");
+			string ruolo = Console.ReadLine();
+			Console.Write("Reparto: ");
+			string reparto = Console.ReadLine();
+			Console.Write("Telefono: ");
+			string telefono = Console.ReadLine();
+			Console.Write("Email: ");
+			string email = Console.ReadLine();
+			Console.Write("Data di assunzione (YYYY-MM-DD): ");
+			string dataAssunzione = Console.ReadLine();
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "INSERT INTO Personale (nome, cognome, ruolo, reparto, telefono, email, data_assunzione) VALUES (@nome, @cognome, @ruolo, @reparto, @telefono, @email, @dataAssunzione)";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("nome", nome);
+			cmd.Parameters.AddWithValue("cognome", cognome);
+			cmd.Parameters.AddWithValue("ruolo", ruolo);
+			cmd.Parameters.AddWithValue("reparto", reparto);
+			cmd.Parameters.AddWithValue("telefono", telefono);
+			cmd.Parameters.AddWithValue("email", email);
+			cmd.Parameters.AddWithValue("dataAssunzione", DateTime.Parse(dataAssunzione));
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Personale creato con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void VisualizzaPersonale()
+		{
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM Personale";
+			using var cmd = new NpgsqlCommand(query, connection);
+			using var reader = cmd.ExecuteReader();
+			while (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Nome: {reader["nome"]}, Cognome: {reader["cognome"]}, Ruolo: {reader["ruolo"]}, Reparto: {reader["reparto"]}, Telefono: {reader["telefono"]}, Email: {reader["email"]}, Data assunzione: {reader["data_assunzione"]}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void VisualizzaDettagliPersonale()
+		{
+			Console.Write("Inserisci l'ID del personale: ");
+			int id = int.Parse(Console.ReadLine());
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM Personale WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("id", id);
+			using var reader = cmd.ExecuteReader();
+			if (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Nome: {reader["nome"]}, Cognome: {reader["cognome"]}, Ruolo: {reader["ruolo"]}, Reparto: {reader["reparto"]}, Telefono: {reader["telefono"]}, Email: {reader["email"]}, Data assunzione: {reader["data_assunzione"]}");
+			}
+			else
+			{
+				Console.WriteLine("Personale non trovato.");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+		static void AggiornaPersonale()
+		{
+			Console.Write("Inserisci l'ID del personale da aggiornare: ");
+			int id = int.Parse(Console.ReadLine());
+
+			Console.Write("Nome: ");
+			string nome = Console.ReadLine();
+			Console.Write("Cognome: ");
+			string cognome = Console.ReadLine();
+			Console.Write("Ruolo (ADMIN/MEDICO/INFERMIERE/RECEPTIONIST): ");
+			string ruolo = Console.ReadLine();
+			Console.Write("Reparto: ");
+			string reparto = Console.ReadLine();
+			Console.Write("Telefono: ");
+			string telefono = Console.ReadLine();
+			Console.Write("Email: ");
+			string email = Console.ReadLine();
+			Console.Write("Data di assunzione (YYYY-MM-DD): ");
+			string dataAssunzione = Console.ReadLine();
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "UPDATE Personale SET nome = @nome, cognome = @cognome, ruolo = @ruolo, reparto = @reparto, telefono = @telefono, email = @email, data_assunzione = @dataAssunzione WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("nome", nome);
+			cmd.Parameters.AddWithValue("cognome", cognome);
+			cmd.Parameters.AddWithValue("ruolo", ruolo);
+			cmd.Parameters.AddWithValue("reparto", reparto);
+			cmd.Parameters.AddWithValue("telefono", telefono);
+			cmd.Parameters.AddWithValue("email", email);
+			cmd.Parameters.AddWithValue("dataAssunzione", DateTime.Parse(dataAssunzione));
+			cmd.Parameters.AddWithValue("id", id);
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Personale aggiornato con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void EliminaPersonale()
+		{
+			Console.Write("Inserisci l'ID del personale da eliminare: ");
+			int id = int.Parse(Console.ReadLine());
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "DELETE FROM Personale WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("id", id);
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Personale eliminato con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void CreaAppuntamento()
 		{
 			Console.Write("ID Paziente: ");
 			int pazienteId = int.Parse(Console.ReadLine());
-
 			Console.Write("ID Personale: ");
 			int personaleId = int.Parse(Console.ReadLine());
-
 			Console.Write("Data (YYYY-MM-DD): ");
-			DateTime data;
-			while (!IsValidDate(Console.ReadLine(), out data))
-			{
-				Console.Write("Data non valida. Inserisci una data valida (YYYY-MM-DD): ");
-			}
-
-			Console.Write("Ora (HH:MM): ");
-			TimeSpan ora;
-			while (!TimeSpan.TryParse(Console.ReadLine(), out ora))
-			{
-				Console.Write("Ora non valida. Inserisci l'ora in formato HH:MM: ");
-			}
-
-			Console.Write("Motivo (lascia vuoto se non specificato): ");
+			string data = Console.ReadLine();
+			Console.Write("Ora (HH:MM:SS): ");
+			string ora = Console.ReadLine();
+			Console.Write("Motivo: ");
 			string motivo = Console.ReadLine();
-			motivo = string.IsNullOrEmpty(motivo) ? null : motivo;
 
-			Console.Write("Stato (programmato/completato/annullato): ");
-			string stato;
-			while (!IsValidStatoAppuntamento(stato = Console.ReadLine().ToLower()))
-			{
-				Console.Write("Stato non valido. Inserisci uno stato valido (programmato/completato/annullato): ");
-			}
-
-			AddAppuntamento(pazienteId, personaleId, data, ora, motivo, stato);
-		}
-
-		static void AddAppuntamento(int pazienteId, int personaleId, DateTime data, TimeSpan ora, string? motivo, string stato)
-		{
 			using var connection = new NpgsqlConnection(connectionString);
 			connection.Open();
-
-			string query = @"INSERT INTO Appuntamenti (paziente_id, personale_id, data, ora, motivo, stato) 
-                             VALUES (@pazienteId, @personaleId, @data, @ora, @motivo, @stato)";
+			string query = "INSERT INTO Appuntamenti (paziente_id, personale_id, data, ora, motivo) VALUES (@pazienteId, @personaleId, @data, @ora, @motivo)";
 			using var cmd = new NpgsqlCommand(query, connection);
-
 			cmd.Parameters.AddWithValue("pazienteId", pazienteId);
 			cmd.Parameters.AddWithValue("personaleId", personaleId);
-			cmd.Parameters.AddWithValue("data", data);
-			cmd.Parameters.AddWithValue("ora", ora);
-			cmd.Parameters.AddWithValue("motivo", motivo ?? (object)DBNull.Value);
-			cmd.Parameters.AddWithValue("stato", stato);
+			cmd.Parameters.AddWithValue("data", DateTime.Parse(data));
+			cmd.Parameters.AddWithValue("ora", TimeSpan.Parse(ora));
+			cmd.Parameters.AddWithValue("motivo", motivo);
 
-			cmd.ExecuteNonQuery();
-			Console.WriteLine("Appuntamento aggiunto con successo.");
-			Console.WriteLine("Premere Invio per continuare.");
-			Console.ReadLine();
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Appuntamento creato con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
 		}
 
-		static void PromptAddPrescrizione()
-		{
-			Console.Write("ID Cartella Clinica: ");
-			int cartellaClinicaId = int.Parse(Console.ReadLine());
-			Console.Write("Farmaco: ");
-			string farmaco = Console.ReadLine();
-			Console.Write("Dosaggio: ");
-			string dosaggio = Console.ReadLine();
-			Console.Write("Frequenza: ");
-			string frequenza = Console.ReadLine();
-			Console.Write("Durata (in giorni, lascia vuoto se non specificato): ");
-			string durataStr = Console.ReadLine();
-			int? durata = string.IsNullOrEmpty(durataStr) ? (int?)null : int.Parse(durataStr);
-			Console.Write("Note (lascia vuoto se non specificato): ");
-			string note = Console.ReadLine();
-			note = string.IsNullOrEmpty(note) ? null : note;
-
-			AddPrescrizione(cartellaClinicaId, farmaco, dosaggio, frequenza, durata, note);
-		}
-
-		static void AddPrescrizione(int cartellaClinicaId, string farmaco, string dosaggio, string frequenza, int? durata, string? note)
+		static void VisualizzaAppuntamenti()
 		{
 			using var connection = new NpgsqlConnection(connectionString);
 			connection.Open();
-
-			string query = @"INSERT INTO Prescrizioni (cartella_clinica_id, farmaco, dosaggio, frequenza, durata, note) 
-                             VALUES (@cartellaClinicaId, @farmaco, @dosaggio, @frequenza, @durata, @note)";
+			string query = "SELECT * FROM Appuntamenti";
 			using var cmd = new NpgsqlCommand(query, connection);
-
-			cmd.Parameters.AddWithValue("cartellaClinicaId", cartellaClinicaId);
-			cmd.Parameters.AddWithValue("farmaco", farmaco);
-			cmd.Parameters.AddWithValue("dosaggio", dosaggio);
-			cmd.Parameters.AddWithValue("frequenza", frequenza);
-			cmd.Parameters.AddWithValue("durata", durata ?? (object)DBNull.Value);
-			cmd.Parameters.AddWithValue("note", note ?? (object)DBNull.Value);
-
-			cmd.ExecuteNonQuery();
-			Console.WriteLine("Prescrizione aggiunta con successo.");
-			Console.WriteLine("Premere Invio per continuare.");
-			Console.ReadLine();
+			using var reader = cmd.ExecuteReader();
+			while (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Paziente ID: {reader["paziente_id"]}, Personale ID: {reader["personale_id"]}, Data: {reader["data"]}, Ora: {reader["ora"]}, Motivo: {reader["motivo"]}, Stato: {reader["stato"]}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
 		}
 
-		static void PromptAddPersonale()
+		static void AggiornaAppuntamento()
 		{
-			throw new NotImplementedException();
+			Console.Write("Inserisci l'ID dell'appuntamento da aggiornare: ");
+			int id = int.Parse(Console.ReadLine());
+
+			Console.Write("ID Paziente: ");
+			int pazienteId = int.Parse(Console.ReadLine());
+			Console.Write("ID Personale: ");
+			int personaleId = int.Parse(Console.ReadLine());
+			Console.Write("Data (YYYY-MM-DD): ");
+			string data = Console.ReadLine();
+			Console.Write("Ora (HH:MM:SS): ");
+			string ora = Console.ReadLine();
+			Console.Write("Motivo: ");
+			string motivo = Console.ReadLine();
+			Console.Write("Stato (PROGRAMMATO/COMPLETATO/ANNULLATO): ");
+			string stato = Console.ReadLine();
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "UPDATE Appuntamenti SET paziente_id = @pazienteId, personale_id = @personaleId, data = @data, ora = @ora, motivo = @motivo, stato = @stato WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("pazienteId", pazienteId);
+			cmd.Parameters.AddWithValue("personaleId", personaleId);
+			cmd.Parameters.AddWithValue("data", DateTime.Parse(data));
+			cmd.Parameters.AddWithValue("ora", TimeSpan.Parse(ora));
+			cmd.Parameters.AddWithValue("motivo", motivo);
+			cmd.Parameters.AddWithValue("stato", stato);
+			cmd.Parameters.AddWithValue("id", id);
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Appuntamento aggiornato con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
 		}
 
-		static void PromptAddCartellaClinica()
+		static void EliminaAppuntamento()
 		{
-			throw new NotImplementedException();
+			Console.Write("Inserisci l'ID dell'appuntamento da eliminare: ");
+			int id = int.Parse(Console.ReadLine());
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "DELETE FROM Appuntamenti WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("id", id);
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Appuntamento eliminato con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
 		}
-		static void AddPersonale()
+		static void VisualizzaReportSettimanaleAppuntamenti()
 		{
-			throw new NotImplementedException();
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM Appuntamenti WHERE data >= current_date - interval '7 days'";
+			using var cmd = new NpgsqlCommand(query, connection);
+			using var reader = cmd.ExecuteReader();
+			while (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Paziente ID: {reader["paziente_id"]}, Personale ID: {reader["personale_id"]}, Data: {reader["data"]}, Ora: {reader["ora"]}, Motivo: {reader["motivo"]}, Stato: {reader["stato"]}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
 		}
 
-		static void AddCartellaClinica()
+		static void CreaCartellaClinica()
 		{
-			throw new NotImplementedException();
+			Console.Write("ID Paziente: ");
+			int pazienteId = int.Parse(Console.ReadLine());
+			Console.Write("Diagnosi: ");
+			string diagnosi = Console.ReadLine();
+			Console.Write("Trattamento: ");
+			string trattamento = Console.ReadLine();
+			Console.Write("Data di apertura (YYYY-MM-DD): ");
+			string dataApertura = Console.ReadLine();
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "INSERT INTO CartelleCliniche (paziente_id, diagnosi, trattamento, data_apertura) VALUES (@pazienteId, @diagnosi, @trattamento, @dataApertura)";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("pazienteId", pazienteId);
+			cmd.Parameters.AddWithValue("diagnosi", diagnosi);
+			cmd.Parameters.AddWithValue("trattamento", trattamento);
+			cmd.Parameters.AddWithValue("dataApertura", DateTime.Parse(dataApertura));
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Cartella clinica creata con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
 		}
-		static bool IsValidSesso(string? sesso) => sesso == "M" || sesso == "F" || sesso == "O";
-		static bool IsValidStatoAppuntamento(string? stato) => Array.Exists(new[] { "PROGRAMMATO", "COMPLETATO", "ANNULLATO" }, s => s.Equals(stato, StringComparison.OrdinalIgnoreCase));
-		static bool IsValidEmail(string? email) => Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
-		static bool IsValidPhone(string? phone) => Regex.IsMatch(phone, @"^[0-9]{10,15}$");
-		static bool IsValidDate(string? dateStr, out DateTime date) => DateTime.TryParse(dateStr, out date) && date <= DateTime.Today;
+
+		static void VisualizzaCartelleCliniche()
+		{
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM Cartelle_Cliniche";
+			using var cmd = new NpgsqlCommand(query, connection);
+			using var reader = cmd.ExecuteReader();
+			while (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Paziente ID: {reader["paziente_id"]}, Data Creazione: {reader["data_creazione"]}, Note Mediche: {reader["note_mediche"]}, Stato Attuale: {reader["stato_attuale"]}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void VisualizzaDettagliCartellaClinica()
+		{
+			Console.Write("Inserisci l'ID della cartella clinica: ");
+			int id = int.Parse(Console.ReadLine());
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM Cartelle_Cliniche WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("id", id);
+			using var reader = cmd.ExecuteReader();
+			if (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Paziente ID: {reader["paziente_id"]}, Data Creazione: {reader["data_creazione"]}, Note Mediche: {reader["note_mediche"]}, Stato Attuale: {reader["stato_attuale"]}");
+			}
+			else
+			{
+				Console.WriteLine("Cartella clinica non trovata.");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void AggiornaCartellaClinica()
+		{
+			Console.Write("Inserisci l'ID della cartella clinica da aggiornare: ");
+			int id = int.Parse(Console.ReadLine());
+
+			Console.Write("Diagnosi: ");
+			string diagnosi = Console.ReadLine();
+			Console.Write("Trattamento: ");
+			string trattamento = Console.ReadLine();
+			Console.Write("Data di apertura (YYYY-MM-DD): ");
+			string dataApertura = Console.ReadLine();
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "UPDATE CartelleCliniche SET diagnosi = @diagnosi, trattamento = @trattamento, data_apertura = @dataApertura WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("diagnosi", diagnosi);
+			cmd.Parameters.AddWithValue("trattamento", trattamento);
+			cmd.Parameters.AddWithValue("dataApertura", DateTime.Parse(dataApertura));
+			cmd.Parameters.AddWithValue("id", id);
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Cartella clinica aggiornata con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void EliminaCartellaClinica()
+		{
+			Console.Write("Inserisci l'ID della cartella clinica da eliminare: ");
+			int id = int.Parse(Console.ReadLine());
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "DELETE FROM CartelleCliniche WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("id", id);
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Cartella clinica eliminata con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void VisualizzaRicoveriSettimanali()
+		{
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM vista_ricoveri_settimanali";
+			using var cmd = new NpgsqlCommand(query, connection);
+			using var reader = cmd.ExecuteReader();
+			while (reader.Read())
+			{
+				Console.WriteLine($"Paziente ID: {reader["paziente_id"]}, Numero Ricoveri: {reader["numero_ricoveri"]}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+		static void VisualizzaDettagliAppuntamento()
+		{
+			Console.Write("Inserisci l'ID dell'appuntamento: ");
+			int id = int.Parse(Console.ReadLine());
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM Appuntamenti WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("id", id);
+			using var reader = cmd.ExecuteReader();
+			if (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Paziente ID: {reader["paziente_id"]}, Personale ID: {reader["personale_id"]}, Data: {reader["data"]}, Ora: {reader["ora"]}, Motivo: {reader["motivo"]}, Stato: {reader["stato"]}");
+			}
+			else
+			{
+				Console.WriteLine("Appuntamento non trovato.");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void AnnullaAppuntamento()
+		{
+			Console.Write("Inserisci l'ID dell'appuntamento da annullare: ");
+			int id = int.Parse(Console.ReadLine());
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "UPDATE Appuntamenti SET stato = 'ANNULLATO' WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("id", id);
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Appuntamento annullato con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void VisualizzaLogModifiche()
+		{
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM LogModifiche";
+			using var cmd = new NpgsqlCommand(query, connection);
+			using var reader = cmd.ExecuteReader();
+			while (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Tabella: {reader["tabella"]}, Azione: {reader["azione"]}, Data: {reader["data"]}, Utente: {reader["utente"]}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+		static void CompletaAppuntamento()
+		{
+			Console.Write("Inserisci l'ID dell'appuntamento da completare: ");
+			int id = int.Parse(Console.ReadLine());
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "UPDATE Appuntamenti SET stato = 'COMPLETATO' WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("id", id);
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Appuntamento completato con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void VisualizzaStoricoAppuntamenti()
+		{
+			Console.Write("Inserisci l'ID del paziente: ");
+			int pazienteId = int.Parse(Console.ReadLine());
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM Appuntamenti WHERE paziente_id = @pazienteId";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("pazienteId", pazienteId);
+			using var reader = cmd.ExecuteReader();
+			while (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Paziente ID: {reader["paziente_id"]}, Personale ID: {reader["personale_id"]}, Data: {reader["data"]}, Ora: {reader["ora"]}, Motivo: {reader["motivo"]}, Stato: {reader["stato"]}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void CreaPrescrizione()
+		{
+			Console.Write("ID Paziente: ");
+			int pazienteId = int.Parse(Console.ReadLine());
+			Console.Write("ID Medico: ");
+			int medicoId = int.Parse(Console.ReadLine());
+			Console.Write("Descrizione: ");
+			string descrizione = Console.ReadLine();
+			Console.Write("Data (YYYY-MM-DD): ");
+			string data = Console.ReadLine();
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "INSERT INTO Prescrizioni (paziente_id, medico_id, descrizione, data) VALUES (@pazienteId, @medicoId, @descrizione, @data)";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("pazienteId", pazienteId);
+			cmd.Parameters.AddWithValue("medicoId", medicoId);
+			cmd.Parameters.AddWithValue("descrizione", descrizione);
+			cmd.Parameters.AddWithValue("data", DateTime.Parse(data));
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Prescrizione creata con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void VisualizzaPrescrizioni()
+		{
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM Prescrizioni";
+			using var cmd = new NpgsqlCommand(query, connection);
+			using var reader = cmd.ExecuteReader();
+			while (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Cartella Clinica ID: {reader["cartella_clinica_id"]}, Farmaco: {reader["farmaco"]}, Dosaggio: {reader["dosaggio"]}, Frequenza: {reader["frequenza"]}, Durata: {reader["durata"]}, Note: {reader["note"]}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void VisualizzaDettagliPrescrizione()
+		{
+			Console.Write("Inserisci l'ID della prescrizione: ");
+			int id = int.Parse(Console.ReadLine());
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM Prescrizioni WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("id", id);
+			using var reader = cmd.ExecuteReader();
+			if (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Cartella Clinica ID: {reader["cartella_clinica_id"]}, Farmaco: {reader["farmaco"]}, Dosaggio: {reader["dosaggio"]}, Frequenza: {reader["frequenza"]}, Durata: {reader["durata"]}, Note: {reader["note"]}");
+			}
+			else
+			{
+				Console.WriteLine("Prescrizione non trovata.");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void AggiornaPrescrizione()
+		{
+			Console.Write("Inserisci l'ID della prescrizione da aggiornare: ");
+			int id = int.Parse(Console.ReadLine());
+
+			Console.Write("Descrizione: ");
+			string descrizione = Console.ReadLine();
+			Console.Write("Data (YYYY-MM-DD): ");
+			string data = Console.ReadLine();
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "UPDATE Prescrizioni SET descrizione = @descrizione, data = @data WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("descrizione", descrizione);
+			cmd.Parameters.AddWithValue("data", DateTime.Parse(data));
+			cmd.Parameters.AddWithValue("id", id);
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Prescrizione aggiornata con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void EliminaPrescrizione()
+		{
+			Console.Write("Inserisci l'ID della prescrizione da eliminare: ");
+			int id = int.Parse(Console.ReadLine());
+
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "DELETE FROM Prescrizioni WHERE ID = @id";
+			using var cmd = new NpgsqlCommand(query, connection);
+			cmd.Parameters.AddWithValue("id", id);
+
+			try
+			{
+				cmd.ExecuteNonQuery();
+				Console.WriteLine("Prescrizione eliminata con successo.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Errore: {ex.Message}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
+
+		static void VisualizzaLogEventi()
+		{
+			using var connection = new NpgsqlConnection(connectionString);
+			connection.Open();
+			string query = "SELECT * FROM LogEventi";
+			using var cmd = new NpgsqlCommand(query, connection);
+			using var reader = cmd.ExecuteReader();
+			while (reader.Read())
+			{
+				Console.WriteLine($"ID: {reader["ID"]}, Evento: {reader["evento"]}, Data: {reader["data"]}, Utente: {reader["utente"]}");
+			}
+			Console.WriteLine("Premere un tasto per continuare...");
+			Console.ReadKey();
+		}
 	}
 }

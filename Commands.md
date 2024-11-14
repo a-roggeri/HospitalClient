@@ -144,4 +144,10 @@ ORDER BY mese DESC;
 
 CREATE INDEX idx_fts_note_mediche ON Cartelle_Cliniche
 USING gin(to_tsvector('italian', note_mediche));
+
+CREATE INDEX idx_fts_motivo ON Appuntamenti
+USING gin(to_tsvector('italian', motivo));
+
+CREATE INDEX idx_fts_note ON Prescrizioni
+USING gin(to_tsvector('italian', note));
 ```

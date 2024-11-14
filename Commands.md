@@ -8,7 +8,7 @@ CREATE TABLE Pazienti (
     indirizzo TEXT NOT NULL,
     telefono VARCHAR(15) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    data_registrazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    data_registrazione TIMESTAMP DEFAULT now()
 );
 
 CREATE TABLE Personale (
@@ -25,7 +25,7 @@ CREATE TABLE Personale (
 CREATE TABLE Cartelle_Cliniche (
     ID SERIAL PRIMARY KEY,
     paziente_id INT NOT NULL REFERENCES Pazienti(ID) ON DELETE CASCADE,
-    data_creazione TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_creazione TIMESTAMP DEFAULT now(),
     note_mediche TEXT,
     stato_attuale VARCHAR(100) CHECK (stato_attuale IN ('RICOVERATO', 'AMBULATORIALE', 'OSSERVAZIONE', 'DIMESSO')) NOT NULL
 );
@@ -33,7 +33,7 @@ CREATE TABLE Cartelle_Cliniche (
 CREATE TABLE Appuntamenti (
     ID SERIAL PRIMARY KEY,
     paziente_id INT NOT NULL REFERENCES Pazienti(ID) ON DELETE CASCADE,
-    personale_id INT NOT NULL REFERENCES Personale(ID) ON DELETE SET NULL,
+    personale_id INT REFERENCES Personale(ID) ON DELETE SET NULL,
     data DATE NOT NULL,
     ora TIME NOT NULL,
     motivo TEXT NOT NULL,
@@ -96,7 +96,7 @@ CREATE TABLE log_modifiche (
     ID SERIAL PRIMARY KEY,
     cartella_clinica_id INT NOT NULL REFERENCES Cartelle_Cliniche(ID) ON DELETE CASCADE,
     modifica TEXT,
-    data_modifica TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    data_modifica TIMESTAMP DEFAULT now()
 );
 
 CREATE OR REPLACE FUNCTION log_modifica_cartella()

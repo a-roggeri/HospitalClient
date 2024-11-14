@@ -46,7 +46,7 @@ CREATE TABLE Prescrizioni (
     farmaco VARCHAR(100) NOT NULL,
     dosaggio VARCHAR(50) NOT NULL,
     frequenza VARCHAR(50) NOT NULL,
-    durata INT,
+    durata INT CHECK (durata > 0 OR durata IS NULL),
     note TEXT
 );
 

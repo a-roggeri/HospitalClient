@@ -89,10 +89,10 @@ VALUES
 
 INSERT INTO Appuntamenti (paziente_id, personale_id, data, ora, motivo, stato)
 VALUES
-    (1, 1, '2025-02-13', '09:30', 'Visita di controllo', 'PROGRAMMATO'),
-    (2, 5, '2025-02-13', '10:00', 'Esami del sangue', 'PROGRAMMATO'),
-    (3, 3, '2025-02-14', '11:30', 'Consulto specialistico', 'PROGRAMMATO'),
-    (4, 4, '2025-02-15', '12:15', 'Rimozione punti', 'PROGRAMMATO'),
+    (1, 1, '2025-03-13', '09:30', 'Visita di controllo', 'PROGRAMMATO'),
+    (2, 5, '2025-03-13', '10:00', 'Esami del sangue', 'PROGRAMMATO'),
+    (3, 3, '2025-05-14', '11:30', 'Consulto specialistico', 'PROGRAMMATO'),
+    (4, 4, '2025-05-15', '12:15', 'Rimozione punti', 'PROGRAMMATO'),
     (5, 2, '2025-02-16', '14:00', 'Controllo post-operatorio', 'PROGRAMMATO'),
     (6, 1, '2025-02-17', '10:45', 'Ecografia', 'PROGRAMMATO'),
     (7, 7, '2025-02-18', '11:00', 'Esami preliminari', 'ANNULLATO'),
@@ -107,11 +107,11 @@ VALUES
     (16, 2, '2025-02-27', '10:30', 'Monitoraggio pressione', 'ANNULLATO'),
     (17, 3, '2025-02-28', '11:15', 'Terapia fisica', 'ANNULLATO'),
     (18, 13, '2025-02-01', '14:00', 'Colloquio con psicologo', 'COMPLETATO'),
-    (19, 9, '2025-02-02', '09:30', 'Esame cardiaco', 'COMPLETATO'),
-    (20, 15, '2025-02-03', '15:00', 'Risonanza magnetica', 'ANNULLATO'),
+    (19, 9, '2025-01-02', '09:30', 'Esame cardiaco', 'COMPLETATO'),
+    (20, 15, '2025-01-03', '15:00', 'Risonanza magnetica', 'ANNULLATO'),
     (21, 14, '2025-02-04', '10:45', 'Test allergico', 'ANNULLATO'),
     (22, 10, '2025-02-05', '11:30', 'Iniezione annuale', 'COMPLETATO'),
-    (23, 4, '2025-02-06', '13:00', 'Controllo post-vaccino', 'COMPLETATO'),
+    (23, 4, '2025-01-06', '13:00', 'Controllo post-vaccino', 'COMPLETATO'),
     (24, 8, '2025-02-07', '15:45', 'Esame ortopedico', 'ANNULLATO'),
     (25, 7, '2025-02-08', '14:15', 'Consulto dermatologico', 'ANNULLATO');
 

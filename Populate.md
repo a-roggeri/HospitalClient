@@ -89,31 +89,31 @@ VALUES
 
 INSERT INTO Appuntamenti (paziente_id, personale_id, data, ora, motivo, stato)
 VALUES
-    (1, 1, '2025-02-12', '09:30', 'Visita di controllo', 'PROGRAMMATO'),
+    (1, 1, '2025-02-13', '09:30', 'Visita di controllo', 'PROGRAMMATO'),
     (2, 5, '2025-02-13', '10:00', 'Esami del sangue', 'PROGRAMMATO'),
-    (3, 3, '2025-02-14', '11:30', 'Consulto specialistico', 'COMPLETATO'),
-    (4, 4, '2025-02-15', '12:15', 'Rimozione punti', 'COMPLETATO'),
+    (3, 3, '2025-02-14', '11:30', 'Consulto specialistico', 'PROGRAMMATO'),
+    (4, 4, '2025-02-15', '12:15', 'Rimozione punti', 'PROGRAMMATO'),
     (5, 2, '2025-02-16', '14:00', 'Controllo post-operatorio', 'PROGRAMMATO'),
-    (6, 1, '2025-02-17', '10:45', 'Ecografia', 'COMPLETATO'),
+    (6, 1, '2025-02-17', '10:45', 'Ecografia', 'PROGRAMMATO'),
     (7, 7, '2025-02-18', '11:00', 'Esami preliminari', 'ANNULLATO'),
     (8, 8, '2025-02-19', '09:00', 'Vaccinazione', 'PROGRAMMATO'),
-    (9, 9, '2025-02-20', '15:30', 'Follow-up post intervento', 'COMPLETATO'),
+    (9, 9, '2025-02-20', '15:30', 'Follow-up post intervento', 'PROGRAMMATO'),
     (10, 10, '2025-02-21', '16:00', 'Rinnovo prescrizione', 'PROGRAMMATO'),
     (11, 3, '2025-02-22', '13:30', 'Consulto per terapia', 'PROGRAMMATO'),
     (12, 5, '2025-02-23', '14:45', 'Esame della vista', 'PROGRAMMATO'),
-    (13, 11, '2025-02-24', '09:15', 'Controllo glicemia', 'COMPLETATO'),
+    (13, 11, '2025-02-24', '09:15', 'Controllo glicemia', 'PROGRAMMATO'),
     (14, 6, '2025-02-25', '12:30', 'Radiografia', 'PROGRAMMATO'),
-    (15, 12, '2025-02-26', '10:00', 'Consulto nutrizionale', 'COMPLETATO'),
-    (16, 2, '2025-02-27', '10:30', 'Monitoraggio pressione', 'PROGRAMMATO'),
-    (17, 3, '2025-02-28', '11:15', 'Terapia fisica', 'COMPLETATO'),
-    (18, 13, '2025-02-01', '14:00', 'Colloquio con psicologo', 'PROGRAMMATO'),
-    (19, 9, '2025-02-02', '09:30', 'Esame cardiaco', 'PROGRAMMATO'),
+    (15, 12, '2025-02-26', '10:00', 'Consulto nutrizionale', 'ANNULLATO'),
+    (16, 2, '2025-02-27', '10:30', 'Monitoraggio pressione', 'ANNULLATO'),
+    (17, 3, '2025-02-28', '11:15', 'Terapia fisica', 'ANNULLATO'),
+    (18, 13, '2025-02-01', '14:00', 'Colloquio con psicologo', 'COMPLETATO'),
+    (19, 9, '2025-02-02', '09:30', 'Esame cardiaco', 'COMPLETATO'),
     (20, 15, '2025-02-03', '15:00', 'Risonanza magnetica', 'ANNULLATO'),
-    (21, 14, '2025-02-04', '10:45', 'Test allergico', 'PROGRAMMATO'),
-    (22, 10, '2025-02-05', '11:30', 'Iniezione annuale', 'PROGRAMMATO'),
-    (23, 4, '2025-02-06', '13:00', 'Controllo post-vaccino', 'PROGRAMMATO'),
-    (24, 8, '2025-02-07', '15:45', 'Esame ortopedico', 'COMPLETATO'),
-    (25, 7, '2025-02-08', '14:15', 'Consulto dermatologico', 'PROGRAMMATO');
+    (21, 14, '2025-02-04', '10:45', 'Test allergico', 'ANNULLATO'),
+    (22, 10, '2025-02-05', '11:30', 'Iniezione annuale', 'COMPLETATO'),
+    (23, 4, '2025-02-06', '13:00', 'Controllo post-vaccino', 'COMPLETATO'),
+    (24, 8, '2025-02-07', '15:45', 'Esame ortopedico', 'ANNULLATO'),
+    (25, 7, '2025-02-08', '14:15', 'Consulto dermatologico', 'ANNULLATO');
 
 INSERT INTO Prescrizioni (cartella_clinica_id, farmaco, dosaggio, frequenza, durata, note)
 VALUES
